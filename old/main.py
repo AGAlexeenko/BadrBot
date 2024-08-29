@@ -10,12 +10,12 @@ import time
 import re
 import csv
 from openpyxl import load_workbook
-from T_sounds import play_stop
-from T_sounds import play_build
+from old.T_sounds import play_stop
+from old.T_sounds import play_build
 import tkinter as tk
 from tkinter import messagebox
 import sys
-import T_villages
+from old import T_villages
 import asyncio
 
 # from ExcelData import building_queue
