@@ -12,12 +12,12 @@ import re
 from PIL import Image, ImageTk
 import threading
 from openpyxl import load_workbook
-from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-import math
 from collections import OrderedDict
 import Oasises
 import Variables
+from RallyPoint import parsing_rally_point
+from Reports import refresh_reports_excel
 
 if Variables.race == 'Romans':
     troops = ['', 'Legionnaire','Praetorian','Imperian','Equites Legati', 'Equites Imperatoris','Equites Caesaris','empty','empty','empty','empty','Hero']
@@ -79,167 +79,10 @@ def open_browser():
     driver.get(active_village[3])
 
 
-def parsing_rally_point():
-    # парсинг атак
-    list_rally_point_attack = []
-    driver.get(Variables.server+'/build.php?gid=16&tt=1&filter=2&subfilters=4')
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    num_of_attack = soup.find('h4', class_="spacer").get_text()
-    num_of_attack = re.search(r'\((\d+)\)', num_of_attack).group(1)
-    attack_pages = math.ceil(int(num_of_attack) / 10)
-
-    for page in range(1, attack_pages + 1):
-        if page != 1:
-            driver.get(
-                Variables.server+'/build.php?gid=16&tt=1&filter=2&subfilters=4&sortOrder=earliestArrivingFirst&page=' + str(
-                    page))
-            html_content = driver.page_source
-            soup = BeautifulSoup(html_content, 'html.parser')
-
-        items = soup.find_all('table', class_=['troop_details outRaid', 'troop_details outAttack'])
-
-        for i in items:
-            map_id = i.find('td', class_='troopHeadline').find('a').get('href')
-            map_id = map_id.split('d=')[1]
-            at = i.find('div', class_='at').find('span').get_text()
-            at = re.search(r'\d{2}:\d{2}:\d{2}', at).group(0)
-            list_rally_point_attack.append(map_id)
-            list_rally_point_attack.append(at)
-        time.sleep(random.randint(1, 2))
-
-    # парсинг возвращений
-    list_rally_point_return = []
-    driver.get(Variables.server+'/build.php?gid=16&tt=1&filter=1&subfilters=2,3')
-    html_content = driver.page_source
-    soup = BeautifulSoup(html_content, 'html.parser')
-    num_of_attack = soup.find('h4', class_="spacer").get_text()
-    num_of_attack = re.search(r'\((\d+)\)', num_of_attack).group(1)
-    attack_pages = math.ceil(int(num_of_attack) / 10)
-
-    for page in range(1, attack_pages + 1):
-        if page != 1:
-            driver.get(
-                Variables.server+'/build.php?gid=16&tt=1&filter=1&subfilters=2%2C3&page=' + str(page))
-            html_content = driver.page_source
-            soup = BeautifulSoup(html_content, 'html.parser')
-
-        items = soup.find_all('table', class_='troop_details inReturn')
-
-        for i in items:
-            map_id = i.find('td', class_='troopHeadline').find('a').get('href')
-            map_id = map_id.split('d=')[1]
-            at = i.find('div', class_='at').find('span').get_text()
-            at = re.search(r'\d{2}:\d{2}:\d{2}', at).group(0)
-            list_rally_point_return.append(map_id)
-            list_rally_point_return.append(at)
-        time.sleep(random.randint(1, 2))
-
-    # записать атаки и возвращения в Уксель
-    workbook = load_workbook(filename='BadrBot.xlsx')
-    sheet = workbook['Rally Point']
-
-    for row in range(1, 501):  # очищаем 500 строк
-        for col in range(1, 5):
-            cell = sheet.cell(row=row, column=col)
-            cell.value = None
-
-    col = 1
-    row = 1
-    for attack in list_rally_point_attack:
-        sheet.cell(row=row, column=col).value = attack
-        if col < 2:
-            col += 1
-        else:
-            col = 1
-            row += 1
-    col = 3
-    row = 1
-    for ret in list_rally_point_return:
-        sheet.cell(row=row, column=col).value = ret
-        if col < 4:
-            col += 1
-        else:
-            col = 3
-            row += 1
-
-    workbook.save(filename='BadrBot.xlsx')
-
-
-def refresh_reports_excel():
-    workbook = load_workbook(filename='BadrBot.xlsx')
-    sheet = workbook['Reports']
-    last_report_date = sheet.cell(row=6, column=6).value
-    stop_parsing_reports = False
-    pages = int(num_of_pages_refresh_reports_excel.get())
-    list_reports = []
-    for page in range(0, pages):
-        if stop_parsing_reports:
-            break
-        if page == 0:
-            driver.get(Variables.server+'/report')
-        else:
-            driver.get(Variables.server+'/report?page=' + str(page + 1))
-        html_content = driver.page_source
-        soup = BeautifulSoup(html_content, 'html.parser')
-        pattern = re.compile(r'sub|dat')
-        items = soup.find_all('td', class_=pattern)
-        current_date = datetime.now().strftime('%d.%m.%y')
-
-        for item in items:
-
-            if 'sub' in item.get('class', []):
-                fight_status = item.find('img', class_=lambda x: x and 'iReport iReport' in x).get('alt')
-                if fight_status == "Lost as attacker.":
-                    robbed = 0
-                else:
-                    robbed = item.find('img', class_=lambda x: x and 'reportInfo ' in x).get('alt')
-                if item.find('span', class_='coordinateX'):
-                    coordinateX = item.find('span', class_='coordinateX').text.strip()[1:]
-                    coordinateY = item.find('span', class_='coordinateY').text.strip()[:-1]
-                    coordinates0 = coordinateX + '|' + coordinateY
-                    cleaned = re.sub(r'[‬‭]', '', coordinates0)
-                    coordinates = cleaned.replace('−', '-')
-
-                else:
-                    a_element = item.find('div').find('a')
-                    text = a_element.get_text(strip=True)
-                    start_index = text.rfind(" ") + 1
-                    coordinates0 = text[start_index:]
-                    cleaned = re.sub(r'[‬‭]', '', coordinates0)
-                    coordinates = cleaned.replace('−', '-')
-
-                list_reports.append(coordinates)
-                list_reports.append(fight_status)
-                list_reports.append(robbed)
-            elif 'dat' in item.get('class', []):
-                dat0 = item.get_text(strip=True)
-                dat = dat0.replace('today', current_date)
-                list_reports.append(dat)
-                if dat == last_report_date:
-                    stop_parsing_reports = True
-                    break
-
-    time.sleep(random.randint(1, 2))
-
-    number_of_reports = int(len(list_reports) / 4)
-    sheet.insert_rows(3, number_of_reports)
-    col = 3
-    row = 3
-    for report in list_reports:
-        sheet.cell(row=row, column=col).value = report
-        if col < 6:
-            col += 1
-        else:
-            col = 3
-            row += 1
-
-    workbook.save(filename='BadrBot.xlsx')
-
-
 def on_button_refresh_reports_excel_click():
-    refresh_reports_excel()
-    parsing_rally_point()
+    num_of_pages_to_refresh = int(num_of_pages_refresh_reports_excel.get())
+    refresh_reports_excel(driver, num_of_pages_to_refresh)
+    parsing_rally_point(driver)
 
 
 def send_troops_new_window(type_of_troops1, type_of_troops2="0", type_of_troops3="0"):  # Отправить войска в новом окне
