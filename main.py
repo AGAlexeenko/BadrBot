@@ -16,13 +16,9 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 import Oasises
 import Variables
-from RallyPoint import parsing_rally_point
-from Reports import refresh_reports_excel
+import RallyPoint
+import Reports
 
-if Variables.race == 'Romans':
-    troops = ['', 'Legionnaire','Praetorian','Imperian','Equites Legati', 'Equites Imperatoris','Equites Caesaris','empty','empty','empty','empty','Hero']
-else:
-    troops = ['', 'Mercenary', 'Bowman', 'Spotter', 'Steppe Rider', 'Marksman','Marauder','empty','empty','empty','empty','Hero']
 
 active_village = []
 building_queue_dic = {}
@@ -81,8 +77,8 @@ def open_browser():
 
 def on_button_refresh_reports_excel_click():
     num_of_pages_to_refresh = int(num_of_pages_refresh_reports_excel.get())
-    refresh_reports_excel(driver, num_of_pages_to_refresh)
-    parsing_rally_point(driver)
+    Reports.refresh_reports_excel(driver, num_of_pages_to_refresh)
+    RallyPoint.parsing_rally_point(driver)
 
 
 def send_troops_new_window(type_of_troops1, type_of_troops2="0", type_of_troops3="0"):  # Отправить войска в новом окне
@@ -106,9 +102,9 @@ def send_troops_new_window(type_of_troops1, type_of_troops2="0", type_of_troops3
     else:
         number_of_troops3 = 0
 
-    name_of_troops = troops[int(type_of_troops1)]
-    name_of_troops2 = troops[int(type_of_troops2)]
-    name_of_troops3 = troops[int(type_of_troops3)]
+    name_of_troops = Variables.troops[int(type_of_troops1)]
+    name_of_troops2 = Variables.troops[int(type_of_troops2)]
+    name_of_troops3 = Variables.troops[int(type_of_troops3)]
 
     def close_new_window_and_karte():  # закрыть мини окно карты и вернуться в основное окно
         driver.close()
@@ -304,6 +300,10 @@ def send_troops_timer(type_of_troops, key_for_x, key_for_y, number_of_troops):
 def get_number_of_troops(type_of_troops):  # получить тип войск
     if type_of_troops == "1":
         return int(ent_troops1.get())
+    if type_of_troops == "2":
+        return int(ent_troops2.get())
+    if type_of_troops == "3":
+        return int(ent_troops3.get())
     if type_of_troops == "4":
         return int(ent_troops4.get())
     if type_of_troops == "5":
@@ -361,13 +361,13 @@ def add_to_farmlist(type_of_troops1, type_of_troops2=0, type_of_troops3=0):
     sheet['E' + str(last_row + 1)] = key_for_x
     sheet['F' + str(last_row + 1)] = key_for_y
     if type_of_troops1 != "0":
-        sheet['H' + str(last_row + 1)] = troops[int(type_of_troops1)]
+        sheet['H' + str(last_row + 1)] = Variables.troops[int(type_of_troops1)]
         sheet['I' + str(last_row + 1)] = number_of_troops1
     if type_of_troops2 != "0":
-        sheet['G' + str(last_row + 1)] = troops[int(type_of_troops2)]
+        sheet['G' + str(last_row + 1)] = Variables.troops[int(type_of_troops2)]
         sheet['K' + str(last_row + 1)] = number_of_troops2
     if type_of_troops3 != "0":
-        sheet['L' + str(last_row + 1)] = troops[int(type_of_troops3)]
+        sheet['L' + str(last_row + 1)] = Variables.troops[int(type_of_troops3)]
         sheet['M' + str(last_row + 1)] = number_of_troops3
     sheet['N' + str(last_row + 1)] = distance
     update_label_message(lable_add_to_farmlist_status, f"{cordinates} добавлена в фармлист")
@@ -414,7 +414,7 @@ def start_farmlist(excel_sheet):
             type_of_troops1_xl = 0
             num_of_troops1_xl = 0
         else:
-            type_of_troops1_xl = troops.index(type_of_troops1_xl)
+            type_of_troops1_xl = Variables.troops.index(type_of_troops1_xl)
 
         type_of_troops2_xl = sheet.cell(row=row, column=10).value
         num_of_troops2_xl = sheet.cell(row=row, column=11).value
@@ -422,7 +422,7 @@ def start_farmlist(excel_sheet):
             type_of_troops2_xl = 0
             num_of_troops2_xl = 0
         else:
-            type_of_troops2_xl = troops.index(type_of_troops2_xl)
+            type_of_troops2_xl = Variables.troops.index(type_of_troops2_xl)
 
         type_of_troops3_xl = sheet.cell(row=row, column=12).value
         num_of_troops3_xl = sheet.cell(row=row, column=13).value
@@ -430,7 +430,7 @@ def start_farmlist(excel_sheet):
             type_of_troops3_xl = 0
             num_of_troops3_xl = 0
         else:
-            type_of_troops3_xl = troops.index(type_of_troops3_xl)
+            type_of_troops3_xl = Variables.troops.index(type_of_troops3_xl)
 
         farmlist_of_lists.append([priority, x_xl, y_xl, type_of_troops1_xl, num_of_troops1_xl, type_of_troops2_xl, num_of_troops2_xl, type_of_troops3_xl, num_of_troops3_xl])
 
@@ -449,13 +449,13 @@ def start_farmlist(excel_sheet):
         x_farm = farm[1]
         y_farm = farm[2]
         type_of_troops1_farm = farm[3]
-        name_of_troops1 = troops[int(type_of_troops1_farm)]
+        name_of_troops1 = Variables.troops[int(type_of_troops1_farm)]
         num_of_troops1_farm = int(farm[4])
         type_of_troops2_farm = farm[5]
-        name_of_troops2 = troops[int(type_of_troops2_farm)]
+        name_of_troops2 = Variables.troops[int(type_of_troops2_farm)]
         num_of_troops2_farm = int(farm[6])
         type_of_troops3_farm = farm[7]
-        name_of_troops3 = troops[int(type_of_troops3_farm)]
+        name_of_troops3 = Variables.troops[int(type_of_troops3_farm)]
         num_of_troops3_farm = int(farm[8])
 
         if num_of_troops1_farm == 1 and type_of_troops1_farm == '1':  # проверка, чтобы не отправить 1 слабого воина
