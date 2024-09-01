@@ -624,6 +624,8 @@ btn_send_troops_1_4_5.grid(row=1, column=1)
 # строка 2 - Отправка одного вида войск в новом окне
 if Variables.race == 'Romans':
     troops1_icon = ImageTk.PhotoImage(Image.open("images/Legioner_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops1_icon = ImageTk.PhotoImage(Image.open("images/Maceman.png"))
 else:
     troops1_icon = ImageTk.PhotoImage(Image.open("images/Mercenaries_ico.png"))
 btn_send_troops1 = tk.Button(tab2, image=troops1_icon, command=lambda: send_troops_new_window('1'))
@@ -631,6 +633,8 @@ btn_send_troops1.grid(row=2, column=1)
 
 if Variables.race == 'Romans':
     troops2_icon = ImageTk.PhotoImage(Image.open("images/Praetorian_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops2_icon = ImageTk.PhotoImage(Image.open("images/Spearman.png"))
 else:
     troops2_icon = ImageTk.PhotoImage(Image.open("images/Bowman_icon.png"))
 btn_send_troops2 = tk.Button(tab2, image=troops2_icon, command=lambda: send_troops_new_window('2'))
@@ -638,6 +642,8 @@ btn_send_troops2.grid(row=2, column=2)
 
 if Variables.race == 'Romans':
     troops3_icon = ImageTk.PhotoImage(Image.open("images/Imperian_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops3_icon = ImageTk.PhotoImage(Image.open("images/Axeman.png"))
 else:
     troops3_icon = ImageTk.PhotoImage(Image.open("images/Spotter_icon.png"))
 btn_send_troops3 = tk.Button(tab2, image=troops3_icon, command=lambda: send_troops_new_window('3'))
@@ -645,6 +651,8 @@ btn_send_troops3.grid(row=2, column=3)
 
 if Variables.race == 'Romans':
     troops4_icon = ImageTk.PhotoImage(Image.open("images/Legati_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops4_icon = ImageTk.PhotoImage(Image.open("images/Scout.png"))
 else:
     troops4_icon = ImageTk.PhotoImage(Image.open("images/Steppe.png"))
 btn_send_troops4 = tk.Button(tab2, image=troops4_icon, command=lambda: send_troops_new_window('4'))
@@ -652,6 +660,8 @@ btn_send_troops4.grid(row=2, column=4)
 
 if Variables.race == 'Romans':
     troops5_icon = ImageTk.PhotoImage(Image.open("images/Imperatoris_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops5_icon = ImageTk.PhotoImage(Image.open("images/Paladin.png"))
 else:
     troops5_icon = ImageTk.PhotoImage(Image.open("images/Marksman_ico.png"))
 btn_send_troops5 = tk.Button(tab2, image=troops5_icon, command=lambda: send_troops_new_window('5'))
@@ -659,6 +669,8 @@ btn_send_troops5.grid(row=2, column=5)
 
 if Variables.race == 'Romans':
     troops6_icon = ImageTk.PhotoImage(Image.open("images/Caesaris_icon.png"))
+elif Variables.race == 'Teutonic':
+    troops6_icon = ImageTk.PhotoImage(Image.open("images/Teutonic Knight.png"))
 else:
     troops6_icon = ImageTk.PhotoImage(Image.open("images/Marauder_ico.png"))
 btn_send_troops6 = tk.Button(tab2, image=troops6_icon, command=lambda: send_troops_new_window('6'))
